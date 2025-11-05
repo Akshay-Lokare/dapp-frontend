@@ -1,11 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 
+interface Transaction {
+  sender: string;
+  recipient: string;
+  amount: number;
+  blockHash: string;
+  ethereumTxHash?: string | null;
+  status: string;
+  broadcasted: boolean;
+  timestamp: string;
+}
+
 const SendMoney: React.FC = () => {
-  const [sender, setSender] = useState<string>('');
-  const [receiver, setReceiver] = useState<string>('');
-  const [amount, setAmount] = useState<string>('');
-  const [broadcastEnabled, setBroadcastEnabled] = useState<boolean>(false);
+  const [sender, setSender] = useState('');
+  const [receiver, setReceiver] = useState('');
+  const [amount, setAmount] = useState('');
+  const [broadcastEnabled, setBroadcastEnabled] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [recentHash, setRecentHash] = useState<string | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -23,8 +36,11 @@ const SendMoney: React.FC = () => {
       return;
     }
 
+    setLoading(true);
+    setRecentHash(null);
+
     try {
-      const res = await fetch("http://localhost:5000/send-money", {
+      const res = await fetch('http://localhost:5000/send-money', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -32,7 +48,7 @@ const SendMoney: React.FC = () => {
           recipient: receiver,
           amount: numericAmount,
           signature: 'valid_signature',
-          broadcastToEthereum: broadcastEnabled
+          broadcastToEthereum: broadcastEnabled,
         }),
       });
 
@@ -41,27 +57,22 @@ const SendMoney: React.FC = () => {
       if (!res.ok) {
         toast.error('Transaction failed');
         console.error('Backend error details:', data);
+        setLoading(false);
         return;
       }
 
-      // Success — show minimal toast, detailed console log
       toast.success('Transaction successful!');
-      console.log('Transaction Details:', {
-        sender,
-        receiver,
-        amount: numericAmount,
-        block_hash: data.python_block_hash,
-        broadcasted: data.broadcasted,
-        ethereum_tx_hash: data.ethereum_tx_hash
-      });
+      console.log('Transaction Details:', data);
 
       setSender('');
       setReceiver('');
       setAmount('');
-
+      setRecentHash(data.ethereum_tx_hash || null);
     } catch (error) {
       console.error('Network or processing error:', error);
       toast.error('Something went wrong. Try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -100,10 +111,10 @@ const SendMoney: React.FC = () => {
             required
           />
 
-          <label className='broadcast-check'>
+          <label className="broadcast-check">
             <input
               type="checkbox"
-              className='broadcast-checkbox'
+              className="broadcast-checkbox"
               checked={broadcastEnabled}
               onChange={(e) => setBroadcastEnabled(e.target.checked)}
             />
@@ -113,11 +124,26 @@ const SendMoney: React.FC = () => {
           <button
             className="send-money-button"
             type="submit"
+            disabled={loading}
           >
-            Transfer Money
+            {loading ? 'Verifying & Sending...' : 'Transfer Money'}
           </button>
 
-          <span></span>
+          {recentHash && (
+            <p
+              style={{
+                marginTop: '20px',
+                fontSize: '14px',
+                color: '#555',
+                wordBreak: 'break-all',
+                textAlign: 'center',
+                fontFamily: 'monospace',
+              }}
+            >
+              <strong>Ethereum Tx Hash:</strong><br />
+              {recentHash}
+            </p>
+          )}
         </form>
 
         <ToastContainer

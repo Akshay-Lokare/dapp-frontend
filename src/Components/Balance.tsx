@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import Nav from './Nav';
 
 interface Transaction {
   sender: string;
   recipient: string;
   amount: number;
   blockHash: string;
+  ethereumTxHash?: string | null,
   status: string;
   broadcasted: boolean;
   timestamp: string;
@@ -52,23 +52,27 @@ const Transactions: React.FC = () => {
             <table className="transactions-table">
             <thead>
                 <tr>
+                <th>Timestamp</th>
                 <th>Sender</th>
                 <th>Recipient</th>
                 <th>Amount</th>
                 <th>Status</th>
                 <th>Broadcasted</th>
-                <th>Timestamp</th>
+                <th>Block Hash</th>
+                <th>Eth Hash</th>
                 </tr>
             </thead>
             <tbody>
                 {transactions.map((tx, idx) => (
                 <tr key={idx}>
+                    <td>{new Date(tx.timestamp).toLocaleString()}</td>
                     <td>{tx.sender}</td>
                     <td>{tx.recipient}</td>
                     <td>{tx.amount.toFixed(2)}</td>
                     <td className={`status ${tx.status.toLowerCase()}`}>{tx.status}</td>
                     <td>{tx.broadcasted ? 'Yes' : 'No'}</td>
-                    <td>{new Date(tx.timestamp).toLocaleString()}</td>
+                    <td>{tx.blockHash}</td>
+                    <td>{tx.ethereumTxHash ? tx.ethereumTxHash : 'N/A'}</td>
                 </tr>
                 ))}
             </tbody>
