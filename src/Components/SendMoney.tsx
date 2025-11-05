@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
-import Nav from './Nav';
 
 const SendMoney: React.FC = () => {
   const [sender, setSender] = useState<string>('');
@@ -115,8 +114,10 @@ const SendMoney: React.FC = () => {
             className="send-money-button"
             type="submit"
           >
-            🚀 Transfer Money
+            Transfer Money
           </button>
+
+          <span></span>
         </form>
 
         <ToastContainer

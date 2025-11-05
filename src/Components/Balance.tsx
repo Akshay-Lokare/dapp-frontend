@@ -1,61 +1,85 @@
 import React, { useState, useEffect } from 'react';
 import Nav from './Nav';
 
-interface BalanceInfo {
-    currency: string,
-    value: string,
-};
+interface Transaction {
+  sender: string;
+  recipient: string;
+  amount: number;
+  blockHash: string;
+  status: string;
+  broadcasted: boolean;
+  timestamp: string;
+}
 
-const Balance: React.FC = () => {
+const Transactions: React.FC = () => {
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-    const [balances, setBalances] = useState<BalanceInfo[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+  useEffect(() => {
+    const fetchTransactions = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/get-transactions');
+        const data = await response.json();
 
-    useEffect(() => {
-        const fetchBalance = async () => {
-            try {
-                const response = await fetch('http://localhost:5000/transactions');
-                
-                const data = await response.json();
-
-                if (data.balances && Array.isArray(data.balances) && data.balances.length > 0) {
-                    setBalances(data.balances);
-                } else {
-                    setBalances([]);
-                    setError('No balance information found.');                }
-
-            } catch (error) {
-                console.error('Error fetching balance:', error);
-            } finally {
-                setLoading(false);
-            }
+        if (Array.isArray(data) && data.length > 0) {
+          setTransactions(data);
+        } else {
+          setError('No transactions found.');
         }
-        fetchBalance();
-    }, []);
-    
-    return (
+      } catch (error) {
+        console.error('Error fetching transactions:', error);
+        setError('Error fetching transactions.');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    <div>
-    <div className="balance-container">
-        <h2 className="balance-title">Account Balance</h2>
+    fetchTransactions();
+  }, []);
 
-        {loading && <p>Loading...</p>}
+  return (
+    <>
+    <div className="transactions-container">
+    <div className="transactions-card">
+        <h2 className="transactions-title">Transaction History</h2>
 
-        {!loading && error && <p>{error}</p>}
+        {loading && <p className="status-text">Loading transactions...</p>}
+        {!loading && error && <p className="status-text error">{error}</p>}
 
-        {!loading && !error && balances.length > 0 && (
-            <ul className="balance-list">
-                {balances.map((b, idx) => (
-                    <li key={idx}>
-                        {b.currency}: <strong>{b.value}</strong>
-                    </li>
+        {!loading && !error && transactions.length > 0 && (
+        <div className="table-container">
+            <table className="transactions-table">
+            <thead>
+                <tr>
+                <th>Sender</th>
+                <th>Recipient</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Broadcasted</th>
+                <th>Timestamp</th>
+                </tr>
+            </thead>
+            <tbody>
+                {transactions.map((tx, idx) => (
+                <tr key={idx}>
+                    <td>{tx.sender}</td>
+                    <td>{tx.recipient}</td>
+                    <td>{tx.amount.toFixed(2)}</td>
+                    <td className={`status ${tx.status.toLowerCase()}`}>{tx.status}</td>
+                    <td>{tx.broadcasted ? 'Yes' : 'No'}</td>
+                    <td>{new Date(tx.timestamp).toLocaleString()}</td>
+                </tr>
                 ))}
-            </ul>
+            </tbody>
+            </table>
+        </div>
         )}
     </div>
     </div>
-    );
+
+    </>
+  );
 };
 
-export default Balance;
+export default Transactions;

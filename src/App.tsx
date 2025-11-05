@@ -4,11 +4,13 @@ import Nav from './Components/Nav';
 import Home from './Components/Home';
 import SendMoney from './Components/SendMoney';
 import Balance from './Components/Balance';
+import SocketLogs from './Components/SocketLogs';
 
 const App: React.FC = () => {
   return (
     <Router>
       <Nav />
+      <SocketLogs />
 
       <div className="container">
         <Routes>
