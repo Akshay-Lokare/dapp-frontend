@@ -117,27 +117,41 @@
   transition: background-color 0.2s, color 0.2s;
 }
 
-/* Hover effect */
 .nav-link:hover {
   background-color: var(--hover-bg);
   color: var(--primary-color);
 }
 
-/* Active link style */
+button.nav-link {
+  text-decoration: none;
+  color: var(--secondary-color);
+  font-weight: 600;
+  padding: 8px 14px;
+  border-radius: 4px;
+  font-size: 16px;
+  transition: background-color 0.2s, color 0.2s;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+button.nav-link:hover {
+  background-color: var(--hover-bg);
+  color: var(--primary-color);
+}
+
 .nav-link.active {
   color: var(--primary-color);
 }
 
-/* Home page background */
 .home {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: calc(100vh - 60px); /* adjust for nav height */
+  height: calc(100vh - 60px);
   font-family: 'Arial', sans-serif;
 }
 
-/* Center card */
 .home-container {
   background-color: var(--card-bg);
   padding: 60px 70px;
@@ -147,7 +161,6 @@
   max-width: 450px;
 }
 
-/* Heading */
 .home-container h1 {
   font-size: 32px;
   font-weight: 700;
@@ -155,14 +168,12 @@
   color: var(--primary-color);
 }
 
-/* Subheading */
 .home-container p {
   font-size: 18px;
   margin-bottom: 35px;
   color: var(--subtext-color)
 }
 
-/* Links/buttons */
 .home-links {
   display: flex;
   justify-content: center;
@@ -180,7 +191,6 @@
   transition: background-color 0.25s, transform 0.2s;
 }
 
-/* Hover effect */
 .home-links a:hover {
   background-color: var(--secondary-color);
   transform: translateY(-2px);
@@ -188,8 +198,6 @@
 }
 
 
-
-/* Send Money container */
 .send-money-container {
   max-width: 450px;
   margin: 50px auto;
@@ -389,3 +397,37 @@
     font-size: 22px;
   }
 }
+
+.transactions-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.toggle-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.toggle-btn {
+  padding: 8px 16px;
+  border: 1px solid var(--primary-color);
+  background-color: transparent;
+  border-radius: 6px;
+  color: var(--primary-color);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+}
+
+.toggle-btn.active {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.toggle-btn:hover {
+  background-color: var(--hover-bg);
+  color: white;
+}
+

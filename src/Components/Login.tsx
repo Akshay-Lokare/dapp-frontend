@@ -1,19 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getToken, isTokenExpired, saveToken, removeToken } from '../utils/auth';
-import { toast } from 'react-toastify';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { jwtDecode } from 'jwt-decode';
+import { UserContext } from '../context/UserContext';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
+  const { setUser } = useContext(UserContext);
 
   useEffect(() => {
     const token = getToken();
     if (token && !isTokenExpired(token)) {
       toast.info('Already logged in', { autoClose: 2000 });
-      navigate('/');
+      setTimeout(() => navigate('/'), 2000); // 👈 small delay to let toast appear
     } else {
       removeToken();
     }
@@ -43,13 +46,19 @@ const Login: React.FC = () => {
       const expiryTime = decoded.exp * 1000;
       const timeLeft = expiryTime - Date.now();
 
-      console.log(`⌛ Token valid for ${Math.round(timeLeft / 1000)} seconds`);
-
       toast.success('Login successful!', { autoClose: 2000 });
 
+      setUser({
+        id: decoded.id,
+        email: decoded.email,
+        role: decoded.role,
+        name: decoded.name
+      });
+
+      // ⏳ Delay navigation slightly to let toast show before redirect
       setTimeout(() => {
         navigate('/');
-      }, 1500);
+      }, 2200);
 
       if (timeLeft > 0) {
         setTimeout(() => {
@@ -95,6 +104,18 @@ const Login: React.FC = () => {
           </button>
         </form>
       </div>
+
+      {/* ✅ Add ToastContainer here */}
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        pauseOnHover
+        draggable
+        theme="colored"
+      />
     </div>
   );
 };

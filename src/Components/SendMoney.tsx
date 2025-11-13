@@ -1,17 +1,26 @@
-import React, { useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
+import { UserContext } from '../context/UserContext';
+import { getToken } from '../utils/auth';
 
 const SendMoney: React.FC = () => {
-  const [sender, setSender] = useState('');
+  const { user } = useContext(UserContext);
+
+  // Keep sender synced with user.email
+  const [sender, setSender] = useState(user?.email || '');
   const [receiver, setReceiver] = useState('');
   const [amount, setAmount] = useState('');
   const [broadcastEnabled, setBroadcastEnabled] = useState(false);
   const [loading, setLoading] = useState(false);
   const [recentHash, setRecentHash] = useState<string | null>(null);
 
+  // Sync context user changes (in case user logs in/out dynamically)
+  useEffect(() => {
+    if (user?.email) setSender(user.email);
+  }, [user]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    if (name === 'sender') setSender(value);
     if (name === 'receiver') setReceiver(value);
     if (name === 'amount') setAmount(value.replace(/[^0-9.]/g, ''));
   };
@@ -29,7 +38,6 @@ const SendMoney: React.FC = () => {
     setRecentHash(null);
 
     try {
-      // sending data to backend from here
       const txData = {
         sender,
         recipient: receiver,
@@ -37,10 +45,14 @@ const SendMoney: React.FC = () => {
         broadcastToEthereum: broadcastEnabled,
       };
 
-      // api to send money to backend
+      const token = getToken();
+
       const res = await fetch('http://localhost:5000/send-money', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`, // ✅ Include JWT
+        },
         body: JSON.stringify(txData),
       });
 
@@ -56,7 +68,6 @@ const SendMoney: React.FC = () => {
       toast.success('Transaction successful!');
       console.log('Transaction Details:', data);
 
-      setSender('');
       setReceiver('');
       setAmount('');
       setRecentHash(data.ethereum_tx_hash || null);
@@ -64,7 +75,6 @@ const SendMoney: React.FC = () => {
     } catch (error) {
       console.error('Network or processing error:', error);
       toast.error('Something went wrong. Try again.');
-      
     } finally {
       setLoading(false);
     }
@@ -76,18 +86,17 @@ const SendMoney: React.FC = () => {
       <form onSubmit={handleSubmit}>
         <input
           className="send-money-input"
-          type="text"
+          type="email"
           name="sender"
-          placeholder="Your Email (used for secret key)"
+          placeholder="Your Email"
           value={sender}
-          onChange={handleChange}
-          required
+          readOnly
         />
         <input
           className="send-money-input"
-          type="text"
+          type="email"
           name="receiver"
-          placeholder="Recipient Account ID/Name"
+          placeholder="Recipient Email"
           value={receiver}
           onChange={handleChange}
           required
@@ -117,7 +126,7 @@ const SendMoney: React.FC = () => {
         <button
           className="send-money-button"
           type="submit"
-          disabled={loading}
+          disabled={loading || !user}
         >
           {loading ? 'Verifying & Sending...' : 'Transfer Money'}
         </button>

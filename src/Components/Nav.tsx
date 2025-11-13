@@ -11,7 +11,7 @@ const Nav: React.FC = () => {
       removeToken();
       console.log(`{} logged out successfully`);
       navigator('/login');
-      
+
     } catch (error) {
       console.log(`Error logging out: ${error}`);
     }
@@ -32,7 +32,7 @@ const Nav: React.FC = () => {
             Transactions
           </NavLink>
 
-          <button onClick={handleLogout}>Logout</button>
+          <button onClick={handleLogout} className='nav-link'>Logout</button>
 
         </div>
       </div>
